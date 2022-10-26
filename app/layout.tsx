@@ -18,7 +18,7 @@ export default function RootLayout({
           <div className='h-[64px] w-full flex justify-between items-center px-8'>
             <div className=''>
               <Link href={config.HOMEPAGE}>
-                Mixing Crew
+                react-quickly
               </Link>
             </div>
             <div className=''>
