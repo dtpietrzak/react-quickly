@@ -9,7 +9,7 @@ export type Config = {
 export const config = () => {
 
   const defaults: Config = {
-    HOMEPAGE: 'http://localhost:3000',
+    HOMEPAGE: 'http://localhost:3000/',
     
     NAVBAR_HEIGHT: '64px',
     FOOTER_HEIGHT: '32px',

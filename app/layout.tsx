@@ -3,6 +3,7 @@ import config from '../config/config'
 import '../styles/globals.css'
 import Link from 'next/link'
 
+
 export default function RootLayout({
   children,
 }: {
@@ -10,7 +11,6 @@ export default function RootLayout({
 }) {
   return (
     <html>
-      <head></head>
       <body>
         <div className='h-screen w-screen flex flex-col justify-start items-start'>
 
@@ -32,13 +32,8 @@ export default function RootLayout({
           <div className='grow w-full'>
             {children}
           </div>
-
-          {/* footer */}
-          <div className='h-[32px] w-full'>
-
-          </div>
         </div>
       </body>
-    </html>
+    </html >
   )
 }

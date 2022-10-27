@@ -1,13 +1,17 @@
-import { initializeApp, FirebaseApp } from "firebase/app"
+import {
+  initializeApp as initFrontApp,
+  FirebaseApp as FirebaseFrontApp,
+} from "firebase/app"
 
-let cachedFirebase: FirebaseApp
+// FRONT END
+let cachedFront: FirebaseFrontApp
 
-export const firebaseApp = (): FirebaseApp => {
-  if (cachedFirebase) return cachedFirebase
-  return initializeFirebase()
+export const firebaseFront = (): FirebaseFrontApp => {
+  if (cachedFront) return cachedFront
+  return initializeFront()
 }
 
-const initializeFirebase = (): FirebaseApp => {
+const initializeFront = (): FirebaseFrontApp => {
   const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
     authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -18,6 +22,6 @@ const initializeFirebase = (): FirebaseApp => {
     measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
   }
 
-  cachedFirebase = initializeApp(firebaseConfig)
-  return cachedFirebase
+  cachedFront = initFrontApp(firebaseConfig)
+  return cachedFront
 }

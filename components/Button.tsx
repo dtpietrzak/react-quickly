@@ -7,8 +7,8 @@ export const Button = () => {
 
   return (
     <button
-      onClick={() => {
-        auth.createUserWithEmailAndPassword('test@test.com', 'password')
+      onClick={async () => {
+        await auth.createUserWithEmailAndPassword('test3@test.com', 'password')
       }}
     >
       test create account

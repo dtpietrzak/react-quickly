@@ -4,6 +4,8 @@
 - Firebase
 - TypeScript
 - TailwindCSS
+- React-Hook-Form
+- Headless-UI
 
 ## Setup
 
