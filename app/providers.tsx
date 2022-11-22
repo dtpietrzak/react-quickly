@@ -4,11 +4,14 @@ import { AuthProvider } from "../contexts/authContext"
 
 interface ProvidersProps {
   children: React.ReactNode
+  authProps: { session: string, expires: number }
 }
 
-export const Providers = ({ children }: ProvidersProps) => {
+export const Providers = ({ children, authProps }: ProvidersProps) => {
   return (
-    <AuthProvider>
+    <AuthProvider
+      session={authProps}
+    >
       {children}
     </AuthProvider>
   )

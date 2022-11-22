@@ -22,40 +22,70 @@ export const AuthContext = createContext<AuthContextProps>(undefined!)
 
 type AuthProviderProps = {
   children: React.ReactNode
+  session: { session: string, expires: number }
 }
 
-export const AuthProvider = ({ children }: AuthProviderProps) => {
+export const AuthProvider = ({ children, session }: AuthProviderProps) => {
   const app = firebaseFront()
   const [user, setUser] = useState<auth.User>()
   const [idToken, setIdToken] = useState<string>()
+  const [checkExpires, setCheckExpires] = useState<number>(0)
 
   const renewIdToken = useCallback((_user: auth.User) => {
-    if (!idToken) {
-      _user?.getIdToken()
-        .then((_idToken) => {
-          
-        })
-        .catch((err) => console.error(err))
-    }
-  }, [idToken])
+    _user?.getIdToken()
+      .then((_idToken) => {
+        setIdToken(_idToken)
+
+        const _checkExpires = new Date(Date.now() + (15 * 60 * 1000))
+        setCheckExpires(_checkExpires.getTime())
+
+        const cookieExpires = new Date(Date.now() + (60 * 60 * 1000))
+        document.cookie =
+          `uidt=${_idToken}; expires=${cookieExpires.toUTCString()}; path=/;`
+      })
+      .catch((err) => console.error(err))
+  }, [])
+
+
+  useEffect(() => {
+    console.log(session)
+
+    document.cookie =
+      `session=${session.session}; path=/;`
+  }, [session])
 
 
   useEffect(() => {
     const unsubscribeAuthState = auth.onAuthStateChanged(
       auth.getAuth(),
-      (user) => { if (user) setUser(user) },
+      (user) => {
+        if (user) {
+          setUser(user)
+          renewIdToken(user)
+        }
+      },
     )
 
     return () => {
       unsubscribeAuthState()
     }
-  }, [])
+  }, [renewIdToken])
 
+  useEffect(() => {
+    expirationTimer = setInterval(() => {
+      if (
+        user &&
+        (
+          checkExpires < Date.now() ||
+          !getCookie('uidt')
+        )
+      ) {
+        renewIdToken(user)
+      }
+    }, (60 * 5 * 1000))
 
-  const updateToken = (_idToken: string) => {
-    setIdToken(_idToken)
-    document.cookie = `uidt=${_idToken}; expires=${new Date(Date.now() + 60 * 60 * 1000).toUTCString()}; path=/;`
-  }
+    return () => clearInterval(expirationTimer)
+  }, [renewIdToken, user, checkExpires])
 
 
   const createUserWithEmailAndPassword = async (
@@ -85,6 +115,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const signOut = async () => {
     return auth.signOut(auth.getAuth())
       .then(async (res) => {
+        document.cookie =
+          `uidt=''; expires=${new Date(Date.now()).toUTCString()}; path=/;`
+        document.cookie =
+          `session=''; expires=${new Date(Date.now()).toUTCString()}; path=/;`
         setUser(undefined)
         return res
       })
@@ -114,3 +148,28 @@ export const useFirebase = () => {
   const firebase = useContext(AuthContext)
   return firebase
 }
+
+
+let expirationTimer: NodeJS.Timer = null!
+
+
+function getCookie(cookie_name: string) {
+  let name = cookie_name + '=';
+  let decodedCookie = decodeURIComponent(document.cookie);
+  let ca = decodedCookie.split(';');
+  for (let i = 0; i < ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) == ' ') {
+      c = c.substring(1);
+    }
+    if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return '';
+}
+
+
+
+
+
