@@ -2,47 +2,23 @@ import config from '../config/config'
 
 import './globals.css'
 import Link from 'next/link'
-import UserNav from './UserNav'
+import UserNav from './_components/UserNav'
 import { Providers } from './providers'
 
-import { cookies } from 'next/headers'
-import { auth } from '../utils/firebaseBack'
-
-const startSession = async () => {
-
-  let sessionToken: string = ''
-  let expiresIn: number = 0
-  const idToken: string = cookies().get('uidt') as string
-
-  try {
-    if (idToken) {
-
-      const decodedIdToken = await auth().verifyIdToken(idToken)
-
-      if (Date.now() / 1000 - decodedIdToken.auth_time < 60 * 60) {
-        expiresIn = (60 * 60 * 24 * 7 * 1000)
-        sessionToken = await auth().createSessionCookie(idToken, { expiresIn })
-      }
-    }
-  } catch { }
-
-  return ({
-    session: sessionToken,
-    expires: expiresIn,
-  })
-}
-
+import { getUser } from '../utils/firebaseBack'
 
 export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const { session, user_auth } = await getUser()
+
   return (
     <html>
       <body>
         <Providers
-          authProps={await startSession()}
+          session={session}
         >
           <div className='h-screen w-screen flex flex-col justify-start items-start'>
 
@@ -50,11 +26,11 @@ export default async function RootLayout({
             <div className='h-[64px] w-full flex justify-between items-center px-8'>
               <div className=''>
                 <Link href={config.HOMEPAGE}>
-                  react-quickly
+                  react-quickly {user_auth?.email}
                 </Link>
               </div>
               <div className=''>
-                <UserNav />
+                <UserNav userEmail={user_auth?.email} />
               </div>
             </div>
 

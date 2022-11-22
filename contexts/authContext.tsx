@@ -3,6 +3,12 @@ import { createContext, useEffect, useState, useCallback, useContext } from "rea
 import * as auth from 'firebase/auth'
 import { firebaseFront } from '../utils/firebaseFront'
 import { FirebaseApp } from "firebase/app"
+import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier"
+
+export type Session = {
+  session?: string
+  user_auth?: DecodedIdToken
+}
 
 export type AuthContextProps = {
   app: FirebaseApp
@@ -22,24 +28,17 @@ export const AuthContext = createContext<AuthContextProps>(undefined!)
 
 type AuthProviderProps = {
   children: React.ReactNode
-  session: { session: string, expires: number }
+  session?: string,
 }
 
 export const AuthProvider = ({ children, session }: AuthProviderProps) => {
   const app = firebaseFront()
   const [user, setUser] = useState<auth.User>()
-  const [idToken, setIdToken] = useState<string>()
-  const [checkExpires, setCheckExpires] = useState<number>(0)
 
   const renewIdToken = useCallback((_user: auth.User) => {
     _user?.getIdToken()
       .then((_idToken) => {
-        setIdToken(_idToken)
-
-        const _checkExpires = new Date(Date.now() + (15 * 60 * 1000))
-        setCheckExpires(_checkExpires.getTime())
-
-        const cookieExpires = new Date(Date.now() + (60 * 60 * 1000))
+        const cookieExpires = new Date(Date.now() + (5 * 60 * 1000))
         document.cookie =
           `uidt=${_idToken}; expires=${cookieExpires.toUTCString()}; path=/;`
       })
@@ -48,10 +47,10 @@ export const AuthProvider = ({ children, session }: AuthProviderProps) => {
 
 
   useEffect(() => {
-    console.log(session)
-
-    document.cookie =
-      `session=${session.session}; path=/;`
+    if (Boolean(session)) {
+      document.cookie =
+        `session=${session}; path=/;`
+    }
   }, [session])
 
 
@@ -65,27 +64,10 @@ export const AuthProvider = ({ children, session }: AuthProviderProps) => {
         }
       },
     )
-
     return () => {
       unsubscribeAuthState()
     }
   }, [renewIdToken])
-
-  useEffect(() => {
-    expirationTimer = setInterval(() => {
-      if (
-        user &&
-        (
-          checkExpires < Date.now() ||
-          !getCookie('uidt')
-        )
-      ) {
-        renewIdToken(user)
-      }
-    }, (60 * 5 * 1000))
-
-    return () => clearInterval(expirationTimer)
-  }, [renewIdToken, user, checkExpires])
 
 
   const createUserWithEmailAndPassword = async (
@@ -93,10 +75,7 @@ export const AuthProvider = ({ children, session }: AuthProviderProps) => {
     password: string,
   ) => {
     return auth.createUserWithEmailAndPassword(auth.getAuth(), email, password)
-      .then(async (res) => {
-        setUser(res.user)
-        return res
-      })
+      .then(() => location.reload())
       .catch((err) => err)
   }
 
@@ -105,22 +84,18 @@ export const AuthProvider = ({ children, session }: AuthProviderProps) => {
     password: string,
   ) => {
     return auth.signInWithEmailAndPassword(auth.getAuth(), email, password)
-      .then(async (res) => {
-        setUser(res.user)
-        return res
-      })
+      .then(() => location.reload())
       .catch((err) => err)
   }
 
   const signOut = async () => {
     return auth.signOut(auth.getAuth())
-      .then(async (res) => {
+      .then(() => {
         document.cookie =
           `uidt=''; expires=${new Date(Date.now()).toUTCString()}; path=/;`
         document.cookie =
           `session=''; expires=${new Date(Date.now()).toUTCString()}; path=/;`
-        setUser(undefined)
-        return res
+        location.reload()
       })
       .catch((err) => err)
   }
@@ -150,24 +125,21 @@ export const useFirebase = () => {
 }
 
 
-let expirationTimer: NodeJS.Timer = null!
-
-
-function getCookie(cookie_name: string) {
-  let name = cookie_name + '=';
-  let decodedCookie = decodeURIComponent(document.cookie);
-  let ca = decodedCookie.split(';');
-  for (let i = 0; i < ca.length; i++) {
-    let c = ca[i];
-    while (c.charAt(0) == ' ') {
-      c = c.substring(1);
-    }
-    if (c.indexOf(name) == 0) {
-      return c.substring(name.length, c.length);
-    }
-  }
-  return '';
-}
+// function getCookie(cookie_name: string) {
+//   let name = cookie_name + '=';
+//   let decodedCookie = decodeURIComponent(document.cookie);
+//   let ca = decodedCookie.split(';');
+//   for (let i = 0; i < ca.length; i++) {
+//     let c = ca[i];
+//     while (c.charAt(0) == ' ') {
+//       c = c.substring(1);
+//     }
+//     if (c.indexOf(name) == 0) {
+//       return c.substring(name.length, c.length);
+//     }
+//   }
+//   return '';
+// }
 
 
 

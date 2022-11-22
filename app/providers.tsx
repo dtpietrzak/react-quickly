@@ -1,16 +1,17 @@
 'use client'
 
+import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier"
 import { AuthProvider } from "../contexts/authContext"
 
 interface ProvidersProps {
   children: React.ReactNode
-  authProps: { session: string, expires: number }
+  session?: string
 }
 
-export const Providers = ({ children, authProps }: ProvidersProps) => {
+export const Providers = ({ children, session }: ProvidersProps) => {
   return (
     <AuthProvider
-      session={authProps}
+      session={session}
     >
       {children}
     </AuthProvider>
