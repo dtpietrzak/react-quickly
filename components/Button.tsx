@@ -2,7 +2,7 @@
 
 import { useFirebase } from "../hooks/useFirebase"
 
-export const Button = () => {
+export const Buttons = () => {
   const auth = useFirebase().auth
 
   return (
@@ -16,4 +16,4 @@ export const Button = () => {
   )
 }
 
-export default Button
+export default Buttons

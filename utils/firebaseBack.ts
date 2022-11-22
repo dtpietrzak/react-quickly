@@ -15,7 +15,6 @@ export const adminSDK = (): admin.app.App => {
 }
 
 export const auth = () => {
-  // console.log(firebaseBack().name)
   firebaseBack()
 
   return admin.auth()
