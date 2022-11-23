@@ -1,5 +1,7 @@
 'use client'
 
+import { ChakraProvider } from '@chakra-ui/react'
+
 import { AuthProvider } from '_global/contexts/authContext'
 
 interface ProvidersProps {
@@ -9,10 +11,10 @@ interface ProvidersProps {
 
 export const Providers = ({ children, session }: ProvidersProps) => {
   return (
-    <AuthProvider
-      session={session}
-    >
-      {children}
+    <AuthProvider session={session}>
+      <ChakraProvider>
+        {children}
+      </ChakraProvider>
     </AuthProvider>
   )
 }

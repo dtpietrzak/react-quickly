@@ -3,8 +3,10 @@
 - NextJS
 - Firebase
 - TypeScript
+- Chakra-UI
 - TailwindCSS
 - React-Hook-Form
+- Zod
 
 ## Setup
 

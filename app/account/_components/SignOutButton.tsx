@@ -1,7 +1,7 @@
 'use client'
 
 import { FC } from 'react'
-import { useFirebase } from '_global/contexts/authContext'
+import { useFirebase } from '_global/hooks'
 
 export const SignOutButton: FC = () => {
   const { auth } = useFirebase()

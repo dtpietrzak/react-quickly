@@ -1,8 +1,6 @@
 import { createContext, useEffect, useState, useCallback, useContext } from 'react'
 
 import * as auth from 'firebase/auth'
-import { firebaseFront } from '_global/utils/firebaseFront'
-import { FirebaseApp } from 'firebase/app'
 import { DecodedIdToken } from 'firebase-admin/lib/auth/token-verifier'
 
 export type Session = {
@@ -11,17 +9,21 @@ export type Session = {
 }
 
 export type AuthContextProps = {
-  app: FirebaseApp
-
   user?: auth.User
 
-  auth: {
-    createUserWithEmailAndPassword: (email: string, password: string) => Promise<auth.UserCredential>
+  createUserWithEmailAndPassword: (
+    email: string,
+    password: string,
+    options?: {
+      noReload?: boolean,
+    }
+  ) => Promise<auth.UserCredential>
 
-    signInWithEmailAndPassword: (email: string, password: string) => Promise<auth.UserCredential>
+  signInWithEmailAndPassword: (email: string, password: string) => Promise<auth.UserCredential>
 
-    signOut: () => Promise<void>
-  }
+  deleteUser: (user: auth.User) => Promise<void>
+
+  signOut: () => Promise<void>
 }
 
 export const AuthContext = createContext<AuthContextProps>(undefined!)
@@ -32,9 +34,15 @@ type AuthProviderProps = {
 }
 
 export const AuthProvider = ({ children, session }: AuthProviderProps) => {
-  const app = firebaseFront()
   const [user, setUser] = useState<auth.User>()
+  const [noReload, setNoReload] = useState<boolean>(false)
 
+  /**
+   * It takes a session token and attempts to make a session cookie with it, the function returns a string about what happened:
+   * 'new session established' | 'session already established' | 'no session established'
+   * @param _session - string (session token)
+   * @returns A promise that resolves to a string.
+   */
   const setSessionCookie = useCallback((_session?: string) => {
     // session has been passed to the client from the server
     if (Boolean(_session)) {
@@ -47,14 +55,14 @@ export const AuthProvider = ({ children, session }: AuthProviderProps) => {
 
         // we need to set the session cookie, and then reload the page so we get the server rendering as a session established user.
         document.cookie = `session=${_session}; path=/;`
-        location.reload
+        !noReload && location.reload()
         return 'new session established'
 
       }
     } else { // session not passed to the client from the server
       return 'no session established'
     }
-  }, [])
+  }, [noReload])
 
 
 
@@ -91,47 +99,54 @@ export const AuthProvider = ({ children, session }: AuthProviderProps) => {
   }
 
   useEffect(() => {
-    console.log(setSessionCookie(session))
+    setSessionCookie(session)
   }, [session, setSessionCookie])
 
 
   useEffect(() => {
-    const unsubscribeAuthState = auth.onAuthStateChanged(
-      auth.getAuth(),
-      async (user) => {
-        console.log(
-          await setIdTokenCookie(user)
+    if (!authListenerInit) {
+      authListenerInit = true
+
+      const unsubscribeAuthState = auth.onAuthStateChanged(
+        auth.getAuth(),
+        async (_user) => {
+          if (_user) setUser(_user)
+          setIdTokenCookie(_user)
             .then((result) => {
-              if (result === 'created') location.reload()
+              result === 'created' && !noReload && location.reload()
               return result
             })
-        )
-      },
-    )
-    return () => {
-      unsubscribeAuthState()
+        },
+      )
+
+      return () => {
+        unsubscribeAuthState()
+      }
     }
-  }, [])
+  }, [noReload])
 
 
-  const createUserWithEmailAndPassword = async (
-    email: string,
-    password: string,
+  const createUserWithEmailAndPassword:
+    AuthContextProps['createUserWithEmailAndPassword'] = async (
+      email, password, options,
+    ) => {
+      if (options?.noReload) setNoReload(true)
+      return auth.createUserWithEmailAndPassword(auth.getAuth(), email, password)
+    }
+
+  const signInWithEmailAndPassword:
+    AuthContextProps['signInWithEmailAndPassword'] = async (
+      email, password,
+    ) => {
+      return auth.signInWithEmailAndPassword(auth.getAuth(), email, password)
+    }
+
+  const deleteUser: AuthContextProps['deleteUser'] = async (
+    _user,
   ) => {
-    return auth.createUserWithEmailAndPassword(auth.getAuth(), email, password)
-      .then((user) => {
-        location.reload()
-      })
-      .catch((err) => err)
-  }
-
-  const signInWithEmailAndPassword = async (
-    email: string,
-    password: string,
-  ) => {
-    return auth.signInWithEmailAndPassword(auth.getAuth(), email, password)
-      .then(() => location.reload())
-      .catch((err) => err)
+    if (_user) {
+      auth.deleteUser(_user)
+    }
   }
 
   const signOut = async () => {
@@ -150,13 +165,11 @@ export const AuthProvider = ({ children, session }: AuthProviderProps) => {
   return (
     <AuthContext.Provider
       value={{
-        app,
         user,
-        auth: {
-          createUserWithEmailAndPassword,
-          signInWithEmailAndPassword,
-          signOut,
-        },
+        createUserWithEmailAndPassword,
+        signInWithEmailAndPassword,
+        signOut,
+        deleteUser,
       }}
     >
       {children}
@@ -164,15 +177,7 @@ export const AuthProvider = ({ children, session }: AuthProviderProps) => {
   )
 }
 
-
-export const useFirebase = () => {
-  const firebase = useContext(AuthContext)
-  return firebase
-}
-
-
-let initialIdTokenCookieHasSet = false
-
+let authListenerInit: boolean = false
 
 function getCookie(cookie_name: string) {
   let name = cookie_name + '=';

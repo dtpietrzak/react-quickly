@@ -1,76 +1,101 @@
 'use client'
 
 import { FC, useState } from 'react'
-import { useFirebase } from '_global/contexts/authContext'
+import { useFirebase } from '_global/hooks'
 
 import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
 
+import { Input, Button } from '@chakra-ui/react'
+import { addDoc, collection } from 'firebase/firestore'
+import { ref, set } from 'firebase/database'
 
-const formDefaults = {
-  firstName: '',
-  lastName: '',
-  userName: '',
-  email: '',
-  password: '',
-  passwordConfirm: '',
-}
-
-export const NotLoggedIn: FC = ({ }) => {
-  const { auth } = useFirebase()
-
-  const { control } = useForm<typeof formDefaults>({
-    defaultValues: formDefaults
+const schema = z
+  .object({
+    userName: z.string(),
+    email: z.string().email(),
+    password: z.string().min(8),
+    passwordConfirm: z.string().min(8),
+  })
+  .refine((data) => data.password === data.passwordConfirm, {
+    message: "Passwords don't match",
+    path: ["passwordConfirm"],
   })
 
-  const [email, setEmail] = useState<string>('')
-  const [password, setPassword] = useState<string>('')
+export const NotLoggedIn: FC = ({ }) => {
+  const { auth, rtdb } = useFirebase()
+
+  const { register, handleSubmit } = useForm<z.infer<typeof schema>>({
+    resolver: zodResolver(schema)
+  })
+
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+
 
   return (
-    <div
-      className='flex flex-col'
-    >
-      <input
-        className='mb-2'
-        placeholder='email'
-        required
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
+    <form className='flex flex-col'>
+      <Input
+        {...register('userName')}
+        mb='2'
+        placeholder='username'
       />
-      <input
-        className='mb-2'
+      <Input
+        {...register('email')}
+        mb='2'
         placeholder='email'
-        required
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
       />
-      <input
-        className='mb-2'
+      <Input
+        {...register('password')}
+        mb='2'
         placeholder='password'
-        required
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
+        type='password'
       />
-      <button
-        className='mb-2'
-        onClick={() => {
-          auth.createUserWithEmailAndPassword(
-            email, password,
-          )
-        }}
+      <Input
+        {...register('passwordConfirm')}
+        mb='2'
+        placeholder='confirm password'
+        type='password'
+      />
+      <Button
+        isLoading={isLoading}
+        mb='2'
+        value='create-account'
+        onClick={handleSubmit(async (data) => {
+          setIsLoading(true)
+          try {
+            const user = await auth.createUserWithEmailAndPassword(
+              data.email, data.password, { noReload: true }
+            )
+            await set(ref(rtdb, `users/${user.user.uid}`), {
+              username: data.userName,
+            })
+            location.reload()
+          } catch { } finally {
+            setIsLoading(false)
+          }
+        })}
       >
         Create Account
-      </button>
-      <button
-        className='mb-2'
-        onClick={() => {
-          auth.signInWithEmailAndPassword(
-            email, password,
-          )
-        }}
+      </Button>
+      <Button
+        isLoading={isLoading}
+        mb='2'
+        value='sign-in'
+        onClick={handleSubmit(async (data) => {
+          setIsLoading(true)
+          try {
+            auth.signInWithEmailAndPassword(
+              data.email, data.password,
+            )
+          } catch { } finally {
+            setIsLoading(false)
+          }
+        })}
       >
         Or Sign In
-      </button>
-    </div>
+      </Button>
+    </form>
   )
 }
 
