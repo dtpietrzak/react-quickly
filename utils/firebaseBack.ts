@@ -45,12 +45,9 @@ const initializeBack = (): FirebaseBackApp => {
 
 
 
-
-
 export const getUser = async () => {
-
-  const idToken: string = cookies().get('uidt') as string
-  let sessionToken: string = cookies().get('session') || '' as string
+  const idToken: string = cookies().get('uidt')?.value || ''
+  let sessionToken: string = cookies().get('session')?.value || ''
 
   try {
     // if there's a session token cookie
