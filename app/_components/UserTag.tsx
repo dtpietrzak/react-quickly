@@ -1,11 +1,11 @@
 import Link from 'next/link'
 import { FC } from 'react'
 
-interface UserNav {
+interface UserTagProps {
   userEmail?: string
 }
 
-export const UserNav: FC<UserNav> = ({ userEmail }) => {
+export const UserTag: FC<UserTagProps> = ({ userEmail }) => {
 
   return (
     <>
@@ -19,4 +19,4 @@ export const UserNav: FC<UserNav> = ({ userEmail }) => {
   )
 }
 
-export default UserNav
+export default UserTag

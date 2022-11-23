@@ -1,7 +1,7 @@
 import {
   initializeApp as initFrontApp,
   FirebaseApp as FirebaseFrontApp,
-} from "firebase/app"
+} from 'firebase/app'
 
 // FRONT END
 let cachedFront: FirebaseFrontApp

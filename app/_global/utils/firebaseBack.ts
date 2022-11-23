@@ -7,8 +7,8 @@ import admin from 'firebase-admin'
 
 import { cookies } from 'next/headers'
 
+import serviceAccount from '../../../serviceAccountKey.json';
 
-const serviceAccount = require('../serviceAccountKey.json')
 
 // BACK END
 let cachedBack: FirebaseBackApp

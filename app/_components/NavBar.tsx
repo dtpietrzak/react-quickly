@@ -1,9 +1,9 @@
 import { FC } from 'react'
 
-import config from '../../config/config'
+import config from '_global/config/config'
 
 import Link from 'next/link'
-import UserNav from './UserNav'
+import UserTag from './UserTag'
 
 export interface NavBarProps {
   user_email?: string
@@ -19,7 +19,7 @@ export const NavBar: FC<NavBarProps> = ({ user_email }) => {
         </Link>
       </div>
       <div className=''>
-        <UserNav userEmail={user_email} />
+        <UserTag userEmail={user_email} />
       </div>
     </div>
   )

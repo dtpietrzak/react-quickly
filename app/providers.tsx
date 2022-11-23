@@ -1,7 +1,6 @@
 'use client'
 
-import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier"
-import { AuthProvider } from "../contexts/authContext"
+import { AuthProvider } from '_global/contexts/authContext'
 
 interface ProvidersProps {
   children: React.ReactNode

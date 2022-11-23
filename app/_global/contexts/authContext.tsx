@@ -1,9 +1,9 @@
-import { createContext, useEffect, useState, useCallback, useContext } from "react"
+import { createContext, useEffect, useState, useCallback, useContext } from 'react'
 
 import * as auth from 'firebase/auth'
-import { firebaseFront } from '../utils/firebaseFront'
-import { FirebaseApp } from "firebase/app"
-import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier"
+import { firebaseFront } from '_global/utils/firebaseFront'
+import { FirebaseApp } from 'firebase/app'
+import { DecodedIdToken } from 'firebase-admin/lib/auth/token-verifier'
 
 export type Session = {
   session?: string

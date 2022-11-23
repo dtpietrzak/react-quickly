@@ -3,9 +3,7 @@ import { Providers } from './providers'
 
 import NavBar from './_components/NavBar'
 
-import { getUser } from '../utils/firebaseBack'
-
-
+import { getUser } from '_global/utils/firebaseBack'
 
 
 export default async function RootLayout({

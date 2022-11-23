@@ -1,4 +1,4 @@
-import { getUser } from '../../utils/firebaseBack'
+import { getUser } from '_global/utils/firebaseBack'
 import LoggedIn from './_components/LoggedIn'
 import NotLoggedIn from './_components/NotLoggedIn'
 
