@@ -8,7 +8,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 
 import { Input, Button } from '@chakra-ui/react'
-import { addDoc, collection } from 'firebase/firestore'
 import { ref, set } from 'firebase/database'
 
 const schema = z
