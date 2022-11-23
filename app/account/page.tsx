@@ -1,61 +1,19 @@
-'use client'
+import { getUser } from '../../utils/firebaseBack'
+import LoggedIn from './_components/LoggedIn'
+import NotLoggedIn from './_components/NotLoggedIn'
 
-import { useState } from 'react'
-import { useFirebase } from '../../contexts/authContext'
-
-export default function Page() {
-  const [email, setEmail] = useState<string>('')
-  const [password, setPassword] = useState<string>('')
-
-  const { auth, user } = useFirebase()
+export default async function Page() {
+  const { user_auth } = await getUser()
 
   return (
 
     <>
       <h1>account page</h1>
       {
-        !user ?
-          <>
-            <input
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <input
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <button
-              onClick={() => {
-                auth.createUserWithEmailAndPassword(
-                  email, password,
-                )
-              }}
-            >
-              Create Account
-            </button>
-            <button
-              onClick={() => {
-                auth.signInWithEmailAndPassword(
-                  email, password,
-                )
-              }}
-            >
-              Sign In
-            </button>
-          </>
+        user_auth ?
+          <LoggedIn user_email={user_auth.email} />
           :
-          <>
-            <p>
-              {user.email}
-            </p>
-            <button
-              onClick={() => {
-                auth.signOut()
-              }}
-            >
-              Sign Out
-            </button>
-          </>
+          <NotLoggedIn />
       }
     </>
 
