@@ -55,10 +55,10 @@ export const getUser = async () => {
     // return the session token
     if (sessionToken) {
       const decodedSessionToken = await auth().verifySessionCookie(sessionToken)
-
+      
       if (decodedSessionToken) return ({
         session: sessionToken,
-        user_auth: decodedSessionToken,
+        user_auth: await auth().getUser(decodedSessionToken.uid),
       })
     }
   } catch { }
@@ -80,7 +80,7 @@ export const getUser = async () => {
 
       return ({
         session: sessionToken,
-        user_auth: decodedIdToken,
+        user_auth: await auth().getUser(decodedIdToken.uid),
       })
     }
   } catch { }

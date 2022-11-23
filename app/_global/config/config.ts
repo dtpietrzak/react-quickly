@@ -6,7 +6,7 @@ export type Config = {
   FOOTER_HEIGHT: string
 }
 
-export const config = () => {
+export const _config = () => {
 
   const defaults: Config = {
     HOMEPAGE: 'http://localhost:3000/',
@@ -19,4 +19,4 @@ export const config = () => {
   return defaults
 }
 
-export default config()
+export default _config()

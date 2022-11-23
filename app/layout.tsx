@@ -18,7 +18,10 @@ export default async function RootLayout({
       <body>
         <Providers session={session}>
           <div className='h-screen w-screen flex flex-col justify-start items-start'>
-            <NavBar user_email={user_auth?.email} />
+            <NavBar
+               email={user_auth?.email}        
+               display_name={user_auth?.displayName}  
+            />
 
             {/* content */}
             <div className='grow w-full'>

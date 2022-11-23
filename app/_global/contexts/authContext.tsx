@@ -2,6 +2,7 @@ import { createContext, useEffect, useState, useCallback, useContext } from 'rea
 
 import * as auth from 'firebase/auth'
 import { DecodedIdToken } from 'firebase-admin/lib/auth/token-verifier'
+import { firebaseFront } from '_global/utils/firebaseFront'
 
 export type Session = {
   session?: string
@@ -16,6 +17,8 @@ export type AuthContextProps = {
     password: string,
     options?: {
       noReload?: boolean,
+      displayName?: string,
+      photoURL?: string,
     }
   ) => Promise<auth.UserCredential>
 
@@ -36,6 +39,16 @@ type AuthProviderProps = {
 export const AuthProvider = ({ children, session }: AuthProviderProps) => {
   const [user, setUser] = useState<auth.User>()
   const [noReload, setNoReload] = useState<boolean>(false)
+
+
+  // this ensures that the firebase app is initialized before this provider uses it, don't want a race condition of needing to use useFirebase before using this provider. The app itself is cached, so no worries about duplication.
+  useEffect(() => {
+    if (!firebaseInit) {
+      firebaseInit = true
+      firebaseFront()
+    }
+  }, [])
+
 
   /**
    * It takes a session token and attempts to make a session cookie with it, the function returns a string about what happened:
@@ -131,7 +144,15 @@ export const AuthProvider = ({ children, session }: AuthProviderProps) => {
       email, password, options,
     ) => {
       if (options?.noReload) setNoReload(true)
-      return auth.createUserWithEmailAndPassword(auth.getAuth(), email, password)
+
+      const result = await auth.createUserWithEmailAndPassword(auth.getAuth(), email, password)
+
+      await auth.updateProfile(result.user, {
+        displayName: options?.displayName,
+        photoURL: options?.photoURL,
+      })
+
+      return result
     }
 
   const signInWithEmailAndPassword:
@@ -177,6 +198,8 @@ export const AuthProvider = ({ children, session }: AuthProviderProps) => {
   )
 }
 
+
+let firebaseInit: boolean = false
 let authListenerInit: boolean = false
 
 function getCookie(cookie_name: string) {

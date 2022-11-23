@@ -1,3 +1,5 @@
+'use client'
+
 import { useContext } from 'react'
 import { firebaseFront } from '_global/utils/firebaseFront'
 import { AuthContext } from '_global/contexts/authContext'

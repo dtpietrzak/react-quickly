@@ -63,12 +63,12 @@ export const NotLoggedIn: FC = ({ }) => {
         onClick={handleSubmit(async (data) => {
           setIsLoading(true)
           try {
-            const user = await auth.createUserWithEmailAndPassword(
-              data.email, data.password, { noReload: true }
+            await auth.createUserWithEmailAndPassword(
+              data.email, data.password, { 
+                noReload: true,
+                displayName: data.userName,
+              }
             )
-            await set(ref(rtdb, `users/${user.user.uid}`), {
-              username: data.userName,
-            })
             location.reload()
           } catch { } finally {
             setIsLoading(false)
@@ -84,7 +84,7 @@ export const NotLoggedIn: FC = ({ }) => {
         onClick={handleSubmit(async (data) => {
           setIsLoading(true)
           try {
-            auth.signInWithEmailAndPassword(
+            await auth.signInWithEmailAndPassword(
               data.email, data.password,
             )
           } catch { } finally {
