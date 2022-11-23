@@ -6,7 +6,6 @@ export default async function Page() {
   const { user_auth } = await getUser()
 
   return (
-
     <>
       <h1>account page</h1>
       {
@@ -16,6 +15,5 @@ export default async function Page() {
           <NotLoggedIn />
       }
     </>
-
   )
 }
