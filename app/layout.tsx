@@ -3,7 +3,7 @@ import { Providers } from './providers'
 
 import NavBar from './_components/NavBar'
 
-import { getUser } from '_global/utils/firebaseBack'
+import { serveUser } from '_global/utils/firebaseBack'
 import CenteredSpinner from '_components/CenteredSpinner'
 
 export default async function RootLayout({
@@ -11,7 +11,7 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-  const { session, user_auth, status } = await getUser()
+  const { session, user_auth } = await serveUser()
 
   return (
     <html>
@@ -25,12 +25,7 @@ export default async function RootLayout({
 
             {/* content */}
             <div className='grow w-full'>
-              {
-                status === 'logging in' ?
-                  <CenteredSpinner />
-                  :
-                  children
-              }
+              {children}
             </div>
           </div>
         </Providers>

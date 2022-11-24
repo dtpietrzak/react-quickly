@@ -1,9 +1,9 @@
-import { getUser } from '_global/utils/firebaseBack'
+import { serveUser } from '_global/utils/firebaseBack'
 import LoggedIn from './_components/LoggedIn'
 import NotLoggedIn from './_components/NotLoggedIn'
 
 export default async function Page() {
-  const { user_auth } = await getUser()
+  const { user_auth } = await serveUser()
 
   return (
     <>
