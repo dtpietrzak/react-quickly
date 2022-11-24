@@ -8,6 +8,7 @@ import admin from 'firebase-admin'
 import { cookies } from 'next/headers'
 
 import serviceAccount from '../../../serviceAccountKey.json';
+import { UserRecord } from 'firebase-admin/lib/auth/user-record';
 
 
 // BACK END
@@ -45,7 +46,11 @@ const initializeBack = (): FirebaseBackApp => {
 
 
 
-export const getUser = async () => {
+export const getUser = async (): Promise<{
+  session?: string,
+  user_auth?: UserRecord,
+  status: 'logged in' | 'logging in' | 'logged out',
+}> => {
   const idToken: string = cookies().get('uidt')?.value || ''
   let sessionToken: string = cookies().get('session')?.value || ''
 
@@ -59,6 +64,7 @@ export const getUser = async () => {
       if (decodedSessionToken) return ({
         session: sessionToken,
         user_auth: await auth().getUser(decodedSessionToken.uid),
+        status: 'logged in',
       })
     }
   } catch { }
@@ -81,6 +87,7 @@ export const getUser = async () => {
       return ({
         session: sessionToken,
         user_auth: await auth().getUser(decodedIdToken.uid),
+        status: 'logging in',
       })
     }
   } catch { }
@@ -89,5 +96,6 @@ export const getUser = async () => {
   return {
     session: undefined,
     user_auth: undefined,
+    status: 'logged out',
   }
 }
