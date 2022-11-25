@@ -8,7 +8,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 
 import { Input, Button } from '@chakra-ui/react'
-import { ref, set } from 'firebase/database'
 
 const schema = z
   .object({
@@ -23,7 +22,7 @@ const schema = z
   })
 
 export const NotLoggedIn: FC = ({ }) => {
-  const { auth, rtdb } = useFirebase()
+  const { auth } = useFirebase()
 
   const { register, handleSubmit } = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema)

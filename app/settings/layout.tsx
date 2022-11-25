@@ -1,12 +1,10 @@
 import Link from 'next/link'
-import { headers } from 'next/headers'
 
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  console.log(headers().get('referer'))
 
   return (
     <div className='w-full h-full flex justify-start items-start'>
