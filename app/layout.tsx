@@ -4,7 +4,7 @@ import { Providers } from './providers'
 import NavBar from './_components/NavBar'
 
 import { serveUser } from '_global/utils/firebaseBack'
-import CenteredSpinner from '_components/CenteredSpinner'
+import CenteredSpinner from '_global/components/CenteredSpinner'
 
 export default async function RootLayout({
   children,

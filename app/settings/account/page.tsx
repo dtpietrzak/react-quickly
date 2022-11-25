@@ -7,7 +7,7 @@ export default async function Page() {
 
   return (
     <>
-      <h1>account page</h1>
+      <h1>Account Settings</h1>
       {
         user_auth ?
           <LoggedIn user_email={user_auth.email} />

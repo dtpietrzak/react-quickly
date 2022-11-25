@@ -1,5 +1,5 @@
 import { FC } from 'react'
-import SignOutButton from './SignOutButton'
+import SignOutButton from '../../_shared/SignOutButton'
 
 export interface LoggedInProps {
   user_email?: string

@@ -5,6 +5,7 @@
 - TypeScript
 - Chakra-UI
 - TailwindCSS
+- React-Icons
 - React-Hook-Form
 - Zod
 

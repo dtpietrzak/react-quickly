@@ -3,7 +3,7 @@ import { FC } from 'react'
 import config from '_global/config/config'
 
 import Link from 'next/link'
-import UserTag from './UserTag'
+import SettingsButton from './SettingsButton'
 
 export interface NavBarProps {
   email?: string
@@ -20,7 +20,7 @@ export const NavBar: FC<NavBarProps> = ({ email, display_name }) => {
         </Link>
       </div>
       <div className=''>
-        <UserTag userEmail={email} />
+        <SettingsButton userEmail={email} />
       </div>
     </div>
   )
